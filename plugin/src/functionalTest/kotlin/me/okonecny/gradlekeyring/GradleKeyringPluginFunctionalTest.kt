@@ -33,7 +33,7 @@ class GradleKeyringPluginFunctionalTest {
         """.trimIndent())
 
         // Run the build
-        val result = listSecretConfigs()
+        val result = runGradleTask("listSecretConfigs")
 
         // Verify the result
         assertTrue(result.output.contains("Secrets defined in this project:"))
@@ -56,17 +56,42 @@ class GradleKeyringPluginFunctionalTest {
         """.trimIndent())
 
         // Run the build
-        val result = listSecretConfigs()
+        val result = runGradleTask("listSecretConfigs")
 
         // Verify the result
         assertTrue(result.output.contains("Secrets defined in this project:"))
     }
 
-    private fun listSecretConfigs(): BuildResult {
+    @Test
+    fun `can list secret values`() {
+        val buildFile = projectDir.resolve("build.gradle.kts")
+        val settingsFile = projectDir.resolve("settings.gradle.kts")
+        // Set up the test build
+        settingsFile.writeText("")
+        buildFile.writeText("""
+            plugins {
+                id("me.okonecny.gradle-keyring")
+            }
+            keyring {
+                secret("default_secret")            
+                secret("explicit_secret").projectProperty("e_s").environmentVariable("EX_SE")            
+            }
+        """.trimIndent())
+
+        // Run the build
+        val result = runGradleTask("listSecretValues", "-Pdefault_secret=foo", "-Pe_s=bar")
+
+        // Verify the result
+        assertTrue(result.output.contains("Secret values in this project:"))
+    }
+
+    private fun runGradleTask(taskName: String, vararg params: String): BuildResult {
         val runner = GradleRunner.create()
         runner.forwardOutput()
         runner.withPluginClasspath()
-        runner.withArguments("listSecretConfigs")
+        val arguments = mutableListOf(taskName)
+        arguments.addAll(params)
+        runner.withArguments(arguments)
         runner.withProjectDir(projectDir)
         val result = runner.build()
         return result
