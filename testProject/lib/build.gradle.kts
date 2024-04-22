@@ -11,6 +11,8 @@ plugins {
 
     // Apply the java-library plugin for API and implementation separation.
     `java-library`
+
+    id("me.okonecny.gradle-keyring") version "0.1"
 }
 
 repositories {

@@ -6,4 +6,4 @@
  */
 
 rootProject.name = "gradle-keyring"
-include("plugin")
+include("gradle-keyring")

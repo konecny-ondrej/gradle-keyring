@@ -8,14 +8,33 @@
 plugins {
     // Apply the Java Gradle plugin development plugin to add support for developing Gradle plugins
     `java-gradle-plugin`
+    `maven-publish`
 
     // Apply the Kotlin JVM plugin to add support for Kotlin.
     alias(libs.plugins.jvm)
 }
 
+group = "me.okonecny"
+version = "0.1"
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
+}
+
 repositories {
     // Use Maven Central for resolving dependencies.
     mavenCentral()
+}
+
+publishing {
+    repositories {
+        maven {
+            name = "ProjectLocal"
+            url = uri(layout.buildDirectory.asFile.get().resolve("repository"))
+        }
+    }
 }
 
 dependencies {

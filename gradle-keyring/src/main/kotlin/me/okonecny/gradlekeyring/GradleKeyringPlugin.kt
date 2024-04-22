@@ -38,5 +38,19 @@ class GradleKeyringPlugin: Plugin<Project> {
             keyringExtension.configs,
             secretAccess
         )
+
+        project.tasks.create(
+            "removeSecret",
+            RemoveSecretTask::class.java,
+            keyringExtension.configs,
+            secretAccess
+        )
+
+        project.tasks.create(
+            "cleanSecrets",
+            CleanSecretsTask::class.java,
+            keyringExtension.configs,
+            secretAccess
+        )
     }
 }
