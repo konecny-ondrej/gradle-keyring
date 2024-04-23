@@ -14,6 +14,11 @@ internal open class ListSecretConfigsTask @Inject constructor(
 
     @TaskAction
     fun listConfiguredSecrets() {
+        if (secretConfigs.isEmpty()) {
+            println("No secrets were configured in this project.")
+            return
+        }
+
         println("Secrets defined in this project:")
         secretConfigs.forEach { (name, config) ->
             println("Keyring name: $name")
