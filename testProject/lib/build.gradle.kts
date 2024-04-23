@@ -20,6 +20,11 @@ repositories {
     mavenCentral()
 }
 
+keyring {
+    secret("test_secret")
+    secret("test_explicit_secret").projectProperty("t_e_s").environmentVariable("TE_EX_SE")
+}
+
 dependencies {
     // Use the Kotlin JUnit 5 integration.
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
