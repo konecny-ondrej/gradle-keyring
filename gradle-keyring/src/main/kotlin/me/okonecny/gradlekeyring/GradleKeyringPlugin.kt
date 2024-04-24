@@ -10,13 +10,21 @@ import org.gradle.api.reflect.TypeOf
  */
 class GradleKeyringPlugin: Plugin<Project> {
     override fun apply(project: Project) {
-        val secretAccess = SecretAccess(project, Keyring::create)
+        val secretAccess = project.gradle.sharedServices.registerIfAbsent(
+            "secretAccess",
+            SecretAccess::class.java
+        ) { buildServiceSpec ->
+            buildServiceSpec.parameters { params ->
+                params.projectKeyringServiceName = project.keyringServiceName
+            }
+        }
 
         val keyringExtension = project.extensions.create(
             TypeOf.typeOf(PublicKeyringExtension::class.java),
             "keyring",
             KeyringExtension::class.java,
-            secretAccess
+            secretAccess,
+            project
         )
 
         project.tasks.create(
@@ -25,32 +33,38 @@ class GradleKeyringPlugin: Plugin<Project> {
             keyringExtension.configs
         )
 
-        project.tasks.create(
+        val listSecretValuesTask = project.tasks.create(
             "listSecretValues",
             ListSecretValuesTask::class.java,
             keyringExtension.configs,
             secretAccess
         )
+        listSecretValuesTask.usesService(secretAccess)
 
-        project.tasks.create(
+        val setSecretValueTask = project.tasks.create(
             "setSecretValue",
             SetSecretTask::class.java,
             keyringExtension.configs,
             secretAccess
         )
+        setSecretValueTask.usesService(secretAccess)
 
-        project.tasks.create(
+        val removeSecretTask = project.tasks.create(
             "removeSecret",
             RemoveSecretTask::class.java,
             keyringExtension.configs,
             secretAccess
         )
+        removeSecretTask.usesService(secretAccess)
 
-        project.tasks.create(
+        val cleanSecretsTask = project.tasks.create(
             "cleanSecrets",
             CleanSecretsTask::class.java,
             keyringExtension.configs,
             secretAccess
         )
+        cleanSecretsTask.usesService(secretAccess)
     }
 }
+
+internal val Project.keyringServiceName: String get() = "Gradle Project " + rootProject.name

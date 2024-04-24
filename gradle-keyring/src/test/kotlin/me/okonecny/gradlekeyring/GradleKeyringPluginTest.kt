@@ -18,5 +18,7 @@ class GradleKeyringPluginTest {
         assertNotNull(project.tasks.findByName("listSecretConfigs"))
         assertNotNull(project.tasks.findByName("listSecretValues"))
         assertNotNull(project.tasks.findByName("setSecretValue"))
+        assertNotNull(project.tasks.findByName("removeSecret"))
+        assertNotNull(project.tasks.findByName("cleanSecrets"))
     }
 }

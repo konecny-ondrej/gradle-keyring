@@ -1,7 +1,10 @@
 package me.okonecny.gradlekeyring
 
+import org.gradle.api.Project
+import org.gradle.api.provider.Provider
 import org.gradle.api.reflect.HasPublicType
 import org.gradle.api.reflect.TypeOf
+import java.util.*
 import javax.inject.Inject
 
 interface PublicKeyringExtension {
@@ -21,11 +24,12 @@ interface PublicKeyringExtension {
 }
 
 internal open class KeyringExtension @Inject internal constructor(
-    secretAccess: SecretAccess
+    secretAccess: Provider<SecretAccess>,
+    project: Project
 ) : PublicKeyringExtension, HasPublicType {
-    private val privateConfigs = mutableMapOf<String, KeyringSecretConfig>()
+    private val privateConfigs = Collections.synchronizedMap(mutableMapOf<String, KeyringSecretConfig>())
     override val configs: Map<String, KeyringSecretConfig> by ::privateConfigs
-    override val secrets: Map<String, String> = SecretAccessMapView(privateConfigs, secretAccess)
+    override val secrets: Map<String, String> = SecretAccessMapView(privateConfigs, secretAccess, project)
 
     override fun secret(
         name: String,

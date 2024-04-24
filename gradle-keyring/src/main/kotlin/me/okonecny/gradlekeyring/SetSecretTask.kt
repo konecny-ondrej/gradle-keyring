@@ -2,14 +2,17 @@ package me.okonecny.gradlekeyring
 
 import me.okonecny.gradlekeyring.KeyringSecretConfig.Companion.requireValidSecretName
 import org.gradle.api.DefaultTask
+import org.gradle.api.provider.Property
+import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.options.Option
 import javax.inject.Inject
 
-internal open class SetSecretTask @Inject constructor(
+internal abstract class SetSecretTask @Inject constructor(
     private val secretConfigs: Map<String, KeyringSecretConfig>,
-    private val secretAccess: SecretAccess
+    private val secretAccessProvider: Provider<SecretAccess>
 ) : DefaultTask() {
     init {
         group = "keyring"
@@ -37,6 +40,6 @@ internal open class SetSecretTask @Inject constructor(
             System.console()?.readPassword("Enter value of %s", secretName)?.concatToString() ?: readln()
         }
 
-        secretAccess.writeSecretValue(config, secretValue)
+        secretAccessProvider.get().writeSecretValue(config, secretValue)
     }
 }

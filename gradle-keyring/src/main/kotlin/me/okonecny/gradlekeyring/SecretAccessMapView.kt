@@ -1,8 +1,13 @@
 package me.okonecny.gradlekeyring
 
+import me.okonecny.gradlekeyring.KeyringSecretConfig.Companion.requireValidSecretName
+import org.gradle.api.Project
+import org.gradle.api.provider.Provider
+
 internal class SecretAccessMapView(
     secretConfigsInput: Map<String, KeyringSecretConfig>,
-    private val secretAccess: SecretAccess
+    private val secretAccess: Provider<SecretAccess>,
+    private val project: Project,
 ) : Map<String, String> {
     private val secretConfigs = secretConfigsInput
     override val keys: Set<String> by secretConfigs::keys
@@ -11,7 +16,7 @@ internal class SecretAccessMapView(
         get() = secretConfigs.entries.map { entry ->
             object : Map.Entry<String, String> {
                 override val key: String = entry.key
-                override val value: String = secretAccess.readSecretValue(entry.value)
+                override val value: String = secretAccess.get().readSecretValue(project, entry.value)
             }
         }.toSet()
     override val values: Collection<String>
@@ -23,9 +28,11 @@ internal class SecretAccessMapView(
 
     override fun containsValue(value: String): Boolean = values.contains(value)
 
-    override fun get(key: String): String? {
-        return secretAccess.readSecretValue(
-            secretConfigs[key] ?: return null
+    override fun get(key: String): String {
+        requireValidSecretName(key)
+        return secretAccess.get().readSecretValue(
+            project,
+            secretConfigs[key] ?: throw NoSuchElementException("There is no configured secret named '%s'. Use the keyring {} block to define it.".format(key))
         )
     }
 }
