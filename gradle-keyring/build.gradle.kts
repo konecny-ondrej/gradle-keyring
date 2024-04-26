@@ -16,6 +16,7 @@ plugins {
 
 group = "me.okonecny"
 version = "0.1"
+description = "Store/load your secrets to/from your system's keyring."
 
 java {
     toolchain {
