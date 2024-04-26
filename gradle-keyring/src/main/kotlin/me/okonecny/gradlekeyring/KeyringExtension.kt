@@ -11,12 +11,12 @@ interface PublicKeyringExtension {
     val secrets: Map<String, String>
     val configs: Map<String, KeyringSecretConfig>
 
-    fun secret(name: String) = secret(name, name, name.uppercase())
+    fun secret(name: String) = secret(name, name, name.uppercase().replace(Regex("[.-]"), "_"))
 
     fun secret(
         name: String,
         projectProperty: String = name,
-        environmentVariable: String = name.uppercase()
+        environmentVariable: String = name.uppercase().replace(Regex("[.-]"), "_")
     ): KeyringSecretConfig
 
     fun KeyringSecretConfig.projectProperty(propertyName: String): KeyringSecretConfig
