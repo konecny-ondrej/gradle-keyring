@@ -22,8 +22,22 @@ internal abstract class ListSecretValuesTask @Inject constructor(
         }
         println("Secret values in this project:")
         val secretAccess = secretAccessProvider.get()
+        val exceptions = mutableListOf<SecretAccessException>()
         secretConfigs.forEach {(name, config) ->
-            println("\t" + name + ": " + secretAccess.readSecretValue(project, config))
+            print("\t$name: ")
+            try {
+                println(secretAccess.readSecretValue(project, config))
+            } catch (e: SecretAccessException) {
+                println("<not set, use './gradlew setSecretValue --name=$name' to set it>")
+                exceptions.add(e)
+            }
+        }
+        if (exceptions.isNotEmpty()) {
+            val summaryException = SecretAccessException(
+                "Could not read secrets:\n\t" + exceptions.map(Exception::message).joinToString("\n\t")
+            )
+            exceptions.forEach(summaryException::addSuppressed)
+            throw summaryException
         }
     }
 }

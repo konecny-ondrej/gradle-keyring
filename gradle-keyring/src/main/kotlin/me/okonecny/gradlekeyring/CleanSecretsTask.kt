@@ -18,6 +18,20 @@ internal abstract class CleanSecretsTask @Inject constructor(
     fun removeSecrets() {
         if (secretConfigs.isEmpty()) return
         val secretAccess = secretAccessProvider.get()
-        secretConfigs.values.forEach(secretAccess::removeSecretFromKeyring)
+        val exceptions = mutableListOf<SecretAccessException>()
+        secretConfigs.values.forEach { secretConfig ->
+            try {
+                secretAccess.removeSecretFromKeyring(secretConfig)
+            } catch (e: SecretAccessException) {
+                exceptions.add(e)
+            }
+        }
+        if (exceptions.isNotEmpty()) {
+            val summaryException = SecretAccessException(
+                "Could not clean secrets:\n\t" + exceptions.map(Exception::message).joinToString("\n\t")
+            )
+            exceptions.forEach(summaryException::addSuppressed)
+            throw summaryException
+        }
     }
 }
