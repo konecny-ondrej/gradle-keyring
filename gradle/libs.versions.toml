@@ -4,3 +4,4 @@
 [plugins]
 jvm = { id = "org.jetbrains.kotlin.jvm", version = "1.9.20" }
 keyring = {id = "me.okonecny.gradle-keyring", version = "0.1"}
+pluginpublish = {id = "com.gradle.plugin-publish", version = "1.2.1"}
