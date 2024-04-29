@@ -20,7 +20,7 @@ In your build script you can use the plugin by making your buildscript look like
 
 ```kotlin
 plugins {
-    id("me.okonecny.gradle-keyring") version "0.1"
+    id("me.okonecny.gradle-keyring") version "0.2"
 }
 ```
 
@@ -44,8 +44,8 @@ publishing {
         maven {
             // All the usual stuff... and then:
             credentials {
-                uasername = keying.secrets["my_repo_user"]
-                password = keying.secrets["my_repo_password"]
+                uasername = keyring.secrets["my_repo_user"]
+                password = keyring.secrets["my_repo_password"]
             }
         }
     }
@@ -85,12 +85,12 @@ so the secrets don't end up in your command history in plaintext.
 
 ## Bootstrapping this project
 
+> [!NOTE]
+> This bootstrap process is needed in this project only, you don't need it in other projects using the plugin.
+
 Because this project itself uses the plugin it implements, we run into a chicken-and-egg problem.
 Fortunately the secrets are not actually needed for building. So you can build the project first,
 then you can use the freshly-built plugin to load the secrets:
 
 1. Boostrap the plugin: `./gradlew publishAllPublicationsToProjectLocalRepository` .
 2. Run a task that requires secrets: `./gradlew listSecretValues -Dorg.gradle.jvmargs="-DuseKeyring"`.
-
-> [!NOTE]
-> This bootstrap process is needed in this project only, you don't need it in other projects using the plugin.

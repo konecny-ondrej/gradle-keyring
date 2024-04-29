@@ -30,9 +30,20 @@ internal class SecretAccessMapView(
 
     override fun get(key: String): String {
         requireValidSecretName(key)
-        return secretAccess.get().readSecretValue(
-            project,
-            secretConfigs[key] ?: throw NoSuchElementException("There is no configured secret named '%s'. Use the keyring {} block to define it.".format(key))
-        )
+        return try {
+            secretAccess.get().readSecretValue(
+                project,
+                secretConfigs[key] ?: throw NoSuchElementException(
+                    "There is no configured secret named '%s'. Use the keyring {} block to define it.".format(
+                        key
+                    )
+                )
+            )
+        } catch (e: SecretAccessException) {
+            project.logger.error(e.localizedMessage, e)
+            // This is for situations where the credentials are not yet set, but are evaluated eagerly in the build script.
+            // If we didn't return something, you wouldn't be able to even run the setSecretValue task.
+            "<not set>"
+        }
     }
 }

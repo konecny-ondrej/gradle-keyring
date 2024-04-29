@@ -11,8 +11,9 @@ plugins {
 
     // Apply the java-library plugin for API and implementation separation.
     `java-library`
+    `maven-publish`
 
-    id("me.okonecny.gradle-keyring") version "0.1"
+    id("me.okonecny.gradle-keyring") version "0.2"
 }
 
 repositories {
@@ -23,6 +24,8 @@ repositories {
 keyring {
     secret("test_secret")
     secret("test_explicit_secret").projectProperty("t_e_s").environmentVariable("TE_EX_SE")
+    secret("my_repo_user")
+    secret("my_repo_password")
 }
 
 dependencies {
@@ -51,4 +54,17 @@ java {
 tasks.named<Test>("test") {
     // Use JUnit Platform for unit tests.
     useJUnitPlatform()
+}
+
+publishing {
+    repositories {
+        maven {
+            name = "test"
+            url = uri("https://example.com/maven")
+            credentials {
+                username = keyring.secrets["my_repo_user"]
+                password = keyring.secrets["my_repo_password"]
+            }
+        }
+    }
 }
