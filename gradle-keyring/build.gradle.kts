@@ -2,7 +2,7 @@ plugins {
     // Apply the Java Gradle plugin development plugin to add support for developing Gradle plugins
     `java-gradle-plugin`
     `maven-publish`
-    `signing`
+    signing
 
     // Apply the Kotlin JVM plugin to add support for Kotlin.
     alias(libs.plugins.jvm)

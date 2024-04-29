@@ -1,16 +1,18 @@
 # Gradle Keyring plugin
 
-This plugin saves the secrets used in your project into your system's keyring,
+This plugin deals with 2 issues:
+1. It saves the secrets used in your project into your system's keyring,
 so you don't have to have them stored in plaintext on your disk. All thanks to the [java-keyring](https://github.com/javakeyring/java-keyring) library.
 
-Also, it allows you to have your secrets saved specifically for each project,
+2. Also, it allows you to have your secrets saved specifically for each project,
 instead of hijacking the whole user profile for one project by putting
 the secrets to `~/.gradle/gradle.properties`.
 
 > [!WARNING]
-> The plugin is only marginally better than having your secrets in plaintext,
-> because depending on your platform any Java program (Mac) or any program with
-> access to the keyring (Linux) can read your secrets.
+> Your secrets will only be encrypted _at rest_.
+> 
+> Depending on your platform any, Java program (Mac), or any program with
+> access to the keyring (Linux), can read your secrets.
 
 ## Usage
 
@@ -80,3 +82,15 @@ and environment variable names. No secrets are exposed.
 so the secrets don't end up in your command history in plaintext.
 - `removeSecret --name=secret_name` - Removes the secret from your keyring.
 - `cleanSecrets` - Remove all secrets defined in the project from your keyring. Useful if you want to quit a project.
+
+## Bootstrapping this project
+
+Because this project itself uses the plugin it implements, we run into a chicken-and-egg problem.
+Fortunately the secrets are not actually needed for building. So you can build the project first,
+then you can use the freshly-built plugin to load the secrets:
+
+1. Boostrap the plugin: `./gradlew publishAllPublicationsToProjectLocalRepository` .
+2. Run a task that requires secrets: `./gradlew listSecretValues -Dorg.gradle.jvmargs="-DuseKeyring"`.
+
+> [!NOTE]
+> This bootstrap process is needed in this project only, you don't need it in other projects using the plugin.
